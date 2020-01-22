@@ -2,6 +2,7 @@ package changelogger
 
 import (
 	"errors"
+	"fmt"
 	chglog "github.com/git-chglog/git-chglog"
 	"github.com/tsuyoshiwada/go-gitcmd"
 )
@@ -39,6 +40,19 @@ func NewChangeLogger() *ChangeLogger {
 	commitExtractor := newCommitExtractor(config.Options)
 
 	return &ChangeLogger{config:config, client:&client, commitParser:commitParser, commitExtractor:commitExtractor, tagReader:tagReader, tagSelector:tagSelector}
+}
+
+func (c *ChangeLogger) GetVersionChangeLog(query string) (*chglog.Version, error) {
+	v, err := c.GetChangeLog(query)
+	if err != nil {
+		return nil, err
+	}
+
+	if len(v) == 0 {
+		return nil, errors.New(fmt.Sprintf("Version %s not found", query))
+	}
+
+	return v[0], nil
 }
 
 func (c *ChangeLogger) GetChangeLog(query string) ([]*chglog.Version, error) {
